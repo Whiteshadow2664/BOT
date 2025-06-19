@@ -1,13 +1,27 @@
-const { Client, GatewayIntentBits, Partials, Events, REST, Routes, SlashCommandBuilder } = require('discord.js');
+// ✅ index.js
+
+const { 
+    Client, 
+    GatewayIntentBits, 
+    Partials, 
+    Events, 
+    REST, 
+    Routes, 
+    SlashCommandBuilder 
+} = require('discord.js');
 require('dotenv').config();
 const bumpRank = require('./bumprank');
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ],
     partials: [Partials.Channel]
 });
 
-// ✅ Register slash command on ready
+// ✅ Register slash command when bot is ready
 client.once(Events.ClientReady, async () => {
     console.log(`${client.user.tag} is online.`);
 
@@ -32,7 +46,7 @@ client.once(Events.ClientReady, async () => {
     }
 });
 
-// ✅ Track bump messages
+// ✅ Listen for bump messages from Disboard
 client.on(Events.MessageCreate, async message => {
     bumpRank.trackBump(message);
 });
@@ -46,5 +60,5 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-// ✅ Login
+// ✅ Login to Discord
 client.login(process.env.BOT_TOKEN);
