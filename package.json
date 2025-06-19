@@ -7,12 +7,12 @@
     "start": "node index.js"
   },
   "keywords": ["discord", "bot", "bump", "leaderboard", "disboard"],
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.17.3",
     "dotenv": "^10.0.0",
     "node-cron": "^3.0.3",
-    "pg": "^8.11.1"
+    "pg": "^8.11.1",
+    "express": "^4.21.2"
   }
 }
