@@ -12,15 +12,14 @@ const pool = new Pool({
     idleTimeoutMillis: 30000,
 });
 
-// ✅ Ensure bump_rank table exists
+// ✅ Ensure bump_rank table exists (without days and avg)
 (async () => {
     try {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS bump_rank (
                 user_id TEXT PRIMARY KEY,
                 username TEXT NOT NULL,
-                bumps INTEGER NOT NULL DEFAULT 0,
-                first_bump_at TIMESTAMP NOT NULL
+                bumps INTEGER NOT NULL DEFAULT 0
             );
         `);
     } catch (err) {
@@ -44,20 +43,19 @@ module.exports.trackBump = async (message) => {
         if (!user) return;
 
         const username = user.user.username;
-        const now = new Date();
 
         if (bumpCache.has(userId)) {
             bumpCache.get(userId).bumps += 1;
         } else {
-            bumpCache.set(userId, { username, bumps: 1, first_bump_at: now });
+            bumpCache.set(userId, { username, bumps: 1 });
         }
 
         console.log(`✅ Tracked bump from ${username}`);
     }
 };
 
-// ✅ Save bump data to DB daily at 05:15 AM IST
-cron.schedule('20 13 * * *', async () => {
+// ✅ Save bump data to DB daily at 1:20 PM IST
+cron.schedule('28 13 * * *', async () => {
     console.log('⏳ Saving bump data to DB...');
 
     if (bumpCache.size === 0) {
@@ -69,18 +67,18 @@ cron.schedule('20 13 * * *', async () => {
         const client = await pool.connect();
 
         for (const [userId, data] of bumpCache.entries()) {
-            const { username, bumps, first_bump_at } = data;
+            const { username, bumps } = data;
             const result = await client.query('SELECT * FROM bump_rank WHERE user_id = $1', [userId]);
 
             if (result.rows.length > 0) {
                 await client.query(
-                    'UPDATE bump_rank SET bumps = bumps + $1 WHERE user_id = $2',
-                    [bumps, userId]
+                    'UPDATE bump_rank SET bumps = bumps + $1, username = $2 WHERE user_id = $3',
+                    [bumps, username, userId]
                 );
             } else {
                 await client.query(
-                    'INSERT INTO bump_rank (user_id, username, bumps, first_bump_at) VALUES ($1, $2, $3, $4)',
-                    [userId, username, bumps, first_bump_at]
+                    'INSERT INTO bump_rank (user_id, username, bumps) VALUES ($1, $2, $3)',
+                    [userId, username, bumps]
                 );
             }
         }
@@ -99,11 +97,9 @@ module.exports.execute = async (interaction) => {
         const client = await pool.connect();
 
         const result = await client.query(`
-            SELECT username, bumps,
-                EXTRACT(DAY FROM NOW() - first_bump_at) AS days,
-                (bumps::FLOAT / NULLIF(EXTRACT(DAY FROM NOW() - first_bump_at), 0)) AS avg_bumps
+            SELECT username, bumps
             FROM bump_rank
-            ORDER BY bumps DESC, avg_bumps DESC
+            ORDER BY bumps DESC
             LIMIT 10
         `);
 
@@ -113,18 +109,15 @@ module.exports.execute = async (interaction) => {
             return interaction.reply({ content: 'No bump data available yet.' });
         }
 
-        const topUser = result.rows[0];
-        const cheer = `🙌 **${topUser.username} is topping the bump charts! Keep it going!**`;
-
         const embed = new EmbedBuilder()
             .setTitle('📈 Bump Leaderboard')
             .setColor('#acf508')
             .setDescription(
                 result.rows
                     .map((row, i) =>
-                        `**#${i + 1}** | **${row.days} Days** | **${row.username}** - **Bumps:** ${row.bumps} | **AVG:** ${row.avg_bumps ? row.avg_bumps.toFixed(2) : '0.00'}`
+                        `**#${i + 1}** | **${row.username}** - **Bumps:** ${row.bumps}`
                     )
-                    .join('\n') + `\n\n${cheer}\n\n**Bumps** = Total bumps | **AVG** = Average bumps per day`
+                    .join('\n') + `\n\n**Bumps** = Total number of times user has bumped`
             );
 
         interaction.reply({ embeds: [embed] });
