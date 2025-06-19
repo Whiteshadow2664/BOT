@@ -29,7 +29,7 @@ const pool = new Pool({
 
 // ✅ Track bump messages from Disboard bot
 module.exports.trackBump = async (message) => {
-    const disboardBotId = '540129267728515072';
+    const disboardBotId = '735147814878969968';
 
     if (
         message.author.id === disboardBotId &&
@@ -54,8 +54,8 @@ module.exports.trackBump = async (message) => {
     }
 };
 
-// ✅ Save bump data to DB daily at 1:20 PM IST
-cron.schedule('28 13 * * *', async () => {
+// ✅ Save bump data to DB daily at 12:00 AM IST
+cron.schedule('00 00 * * *', async () => {
     console.log('⏳ Saving bump data to DB...');
 
     if (bumpCache.size === 0) {
@@ -110,8 +110,8 @@ module.exports.execute = async (interaction) => {
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('📈 Bump Leaderboard')
-            .setColor('#acf508')
+            .setTitle('<302050872383242240> Bump Leaderboard')
+            .setColor('#98fb98')
             .setDescription(
                 result.rows
                     .map((row, i) =>
