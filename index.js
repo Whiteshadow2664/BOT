@@ -1,17 +1,26 @@
 // ✅ index.js
 
-const { 
-    Client, 
-    GatewayIntentBits, 
-    Partials, 
-    Events, 
-    REST, 
-    Routes, 
-    SlashCommandBuilder 
+const {
+    Client,
+    GatewayIntentBits,
+    Partials,
+    Events,
+    REST,
+    Routes,
+    SlashCommandBuilder
 } = require('discord.js');
 require('dotenv').config();
 const bumpRank = require('./bumprank');
 
+// ✅ Start express server to keep bot alive
+const express = require('express');
+const app = express();
+const PORT = 3000;
+
+app.get('/', (req, res) => res.send('Bump Tracker Bot is running.'));
+app.listen(PORT, () => console.log(`🌐 Server running on http://localhost:${PORT}`));
+
+// ✅ Initialize Discord client
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
