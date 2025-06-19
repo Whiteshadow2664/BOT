@@ -30,7 +30,7 @@ const pool = new Pool({
 
 // ✅ Track bump messages from Disboard bot
 module.exports.trackBump = async (message) => {
-    const disboardBotId = '735147814878969968';
+    const disboardBotId = '540129267728515072';
 
     if (
         message.author.id === disboardBotId &&
