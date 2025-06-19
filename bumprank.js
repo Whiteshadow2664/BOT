@@ -111,7 +111,7 @@ module.exports.execute = async (interaction) => {
 
         const embed = new EmbedBuilder()
             .setTitle('<302050872383242240> Bump Leaderboard')
-            .setColor('#800080')
+            .setColor('#ffffff')
             .setDescription(
                 result.rows
                     .map((row, i) =>
