@@ -117,7 +117,7 @@ module.exports.execute = async (interaction) => {
                     .map((row, i) =>
                         `**#${i + 1}** | **${row.username}** - **Bumps:** ${row.bumps}`
                     )
-                    .join('\n') + `\n\n**Bumps** = Total number of times user has bumped`
+                    .join('\n') + `\n\n**Bumps** = Total number of times user has bumped & leaderboard updates daily at <t::R>`
             );
 
         interaction.reply({ embeds: [embed] });
