@@ -1,3 +1,5 @@
+// ✅ bumprank.js
+
 const { EmbedBuilder } = require('discord.js');
 const { Pool } = require('pg');
 const cron = require('node-cron');
@@ -7,7 +9,7 @@ const bumpCache = new Map();
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
-    idleTimeoutMillis: 30000
+    idleTimeoutMillis: 30000,
 });
 
 // ✅ Ensure bump_rank table exists
@@ -108,7 +110,7 @@ module.exports.execute = async (interaction) => {
         client.release();
 
         if (result.rows.length === 0) {
-            return interaction.reply({ content: 'No bump data available yet.', ephemeral: true });
+            return interaction.reply({ content: 'No bump data available yet.' });
         }
 
         const topUser = result.rows[0];
@@ -118,16 +120,16 @@ module.exports.execute = async (interaction) => {
             .setTitle('📈 Bump Leaderboard')
             .setColor('#acf508')
             .setDescription(
-                result.rows.map((row, i) =>
-                    `**#${i + 1}** | **${row.days} Days** | **${row.username}** - **Bumps:** ${row.bumps} | **AVG:** ${row.avg_bumps ? row.avg_bumps.toFixed(2) : '0.00'}`
-                ).join('\n') +
-                `\n\n${cheer}\n\n**Bumps** = Total bumps | **AVG** = Average bumps per day`
+                result.rows
+                    .map((row, i) =>
+                        `**#${i + 1}** | **${row.days} Days** | **${row.username}** - **Bumps:** ${row.bumps} | **AVG:** ${row.avg_bumps ? row.avg_bumps.toFixed(2) : '0.00'}`
+                    )
+                    .join('\n') + `\n\n${cheer}\n\n**Bumps** = Total bumps | **AVG** = Average bumps per day`
             );
 
         interaction.reply({ embeds: [embed] });
-
     } catch (error) {
         console.error('Error fetching bump leaderboard:', error);
-        interaction.reply({ content: 'An error occurred while retrieving the leaderboard.', ephemeral: true });
+        interaction.reply({ content: 'An error occurred while retrieving the leaderboard.' });
     }
 };
